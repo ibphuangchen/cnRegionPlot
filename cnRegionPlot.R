@@ -1,4 +1,5 @@
 #!/usr/bin/env Rscript
+#Author: Chen Huang ibphuangchen@gmail.com
 
 ##all the functions needed
 seg2Ranges = function(totalChrLengthDf){
@@ -145,7 +146,7 @@ plotCNV = function(segDf, outputFile, fileFormat){
 
 # create parser object
 suppressPackageStartupMessages(library("argparse"))
-parser = ArgumentParser()
+parser = ArgumentParser(description= "Author: Chen Huang ibphuangchen@gmail.com")
 parser$add_argument("file", nargs=1, help="Segment file to be displayed")
 parser$add_argument("output", nargs=1, help="File of the output plot")
 parser$add_argument("-S", "--samples", help="Samples to be displayed [default ALL]",
