@@ -26,9 +26,11 @@ fillwithNA = function(segDf, totalChrRangeObj){
                    log2 = segDf$log2)
   ##the segmenets not covered by the segObj
   naRanges = setdiff(totalChrRangeObj, segObj)
-  naRanges$log2 = NA
-  #combining naRanges to segObj
-  segObj = c(segObj, naRanges)
+  if(length(naRanges)!=0){
+    naRanges$log2 = NA
+    #combining naRanges to segObj
+    segObj = c(segObj, naRanges)
+  }
   segObj = sort(segObj)
   segObj = as.data.frame(segObj)
   colnames(segObj)[1] = "chromosome"
@@ -119,6 +121,7 @@ plotCNV = function(segDf, outputFile, fileFormat){
   segDf$log2 = ifelse(segDf$log2 > 1, 1, segDf$log2)
   segDf$log2 = ifelse(segDf$log2 < -1, -1, segDf$log2)
   samples = unique(segDf$sample)
+  newSegDf$sample = factor(newSegDf$sample,levels = samples)
   plotCNV = ggplot(segDf, aes(1, width, fill=log2)) + 
     geom_bar(stat="identity")+
     scale_fill_gradient2(high = muted("red"), low = muted("blue"))+
@@ -141,7 +144,7 @@ plotCNV = function(segDf, outputFile, fileFormat){
     coord_flip()
   baseHigh = 1
   ggsave(plot = plotCNV, filename = outputFile, device = fileFormat, 
-         dpi = 300, width = 20, units = "cm", height = baseHigh*(length(samples)+2))
+         dpi = 300, width = 20, units = "cm", height = baseHigh*(length(samples)+2), limitsize = F)
 }
 
 # create parser object
@@ -152,12 +155,12 @@ parser$add_argument("output", nargs=1, help="File of the output plot")
 parser$add_argument("-S", "--samples", help="Samples to be displayed [default ALL]",
                   metavar="sample1,sample2,...", default = NULL)
 parser$add_argument("-c", "--chromosome", help="Chromosomes to be displayed [default ALL]",
-                    metavar="chromosome1, chromsome2, ...", default = NULL)
+                    metavar="chromosome1, chromosome2, ...", default = NULL)
 
-parser$add_argument("-s", "--start", help="Start position of the chromsome [default NULL]",
+parser$add_argument("-s", "--start", help="Start position of the chromosome [default NULL]",
                     metavar = "start1, start2, ...", default = NULL)
 
-parser$add_argument("-e", "--end", help="End position of the chromsome [default NULL]",
+parser$add_argument("-e", "--end", help="End position of the chromosome [default NULL]",
                     metavar = "end1, end2, ...", default = NULL)
 
 parser$add_argument("-g", "--genome", help="Genome version [default hg19]",
@@ -202,7 +205,7 @@ if(args$genome == "hg19"){
 chrLengthObj = seg2Ranges(ChrLengthDf)
 
 if(checkFlag == TRUE &(length(startVec)!=length(chromVec) | length(endVec)!=length(chromVec)))
-  stop("Error: You need to specify equal number of starts and ends to the chromsomes")
+  stop("Error: You need to specify equal number of starts and ends to the chromosomes")
 output = args$output
 
 if(grepl(output, pattern = "\\.")) {
@@ -219,9 +222,9 @@ if(!outputFormat %in% c("pdf", "jpeg", "tiff", "png", "bmp", "svg"))
 cat("Reading in the segment file\n")
 segFile = read.table(args$file, sep = "\t", header = TRUE, stringsAsFactors = F)
 
-if(any(!c("sample","chromosome","start","end","log2") %in% colnames(segFile))){
+if(!all(c("sample","chromosome","start","end","log2") %in% colnames(segFile))){
   stop("Error: the segFiles should contain 5 columns:\n
-       \t\"sample\",\"chromsome\",\"start\",\"end\",\"log2\"")
+       \t\"sample\",\"chromosome\",\"start\",\"end\",\"log2\"")
 }
 cat("Reading input file DONE\n")
 
