@@ -1,5 +1,5 @@
-The R script plot the copy number alteration (log2 ratio) across genome regions.
-You can specify the samples, chromosomes and genome regions that you want to display the copy number landscape.
+This R script plots the copy number alteration (log2 ratio) across genome regions.
+You can specify the samples, chromosomes and genome regions that you want to display.
 
 You need to install the following packages to use it:
 	ggplot2
